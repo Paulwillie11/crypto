@@ -1,0 +1,68 @@
+import tkinter as tk
+from tkinter import messagebox
+
+def calculate_pnl():
+    try:
+        capital = float(entry_capital.get())
+        leverage = float(entry_leverage.get())
+        entry_price = float(entry_entry_price.get())
+        exit_price = float(entry_exit_price.get())
+        position = position_var.get()
+
+        position_size = capital * leverage  # Liquidity
+
+        if position == "long":
+            pnl = (exit_price - entry_price) / entry_price * position_size
+            liquidation_price = entry_price - (entry_price / leverage)
+        elif position == "short":
+            pnl = (entry_price - exit_price) / entry_price * position_size
+            liquidation_price = entry_price + (entry_price / leverage)
+        else:
+            raise ValueError("Invalid position type.")
+
+        pnl_percent = (pnl / capital) * 100
+
+        result_label.config(
+            text=(
+                f"Liquidity (Position Size): ${position_size:.2f}\n"
+                f"PnL: ${pnl:.2f}\n"
+                f"PnL %: {pnl_percent:.2f}%\n"
+                f"Liquidation Price: {liquidation_price:.4f}"
+            )
+        )
+    except Exception as e:
+        messagebox.showerror("Input Error", str(e))
+
+# GUI setup
+root = tk.Tk()
+root.title("Trade Profit/Loss Calculator")
+
+# Labels and entries
+tk.Label(root, text="Capital ($):").grid(row=0, column=0, sticky="e")
+tk.Label(root, text="Leverage (x):").grid(row=1, column=0, sticky="e")
+tk.Label(root, text="Entry Price:").grid(row=2, column=0, sticky="e")
+tk.Label(root, text="Exit Price:").grid(row=3, column=0, sticky="e")
+
+entry_capital = tk.Entry(root)
+entry_leverage = tk.Entry(root)
+entry_entry_price = tk.Entry(root)
+entry_exit_price = tk.Entry(root)
+
+entry_capital.grid(row=0, column=1)
+entry_leverage.grid(row=1, column=1)
+entry_entry_price.grid(row=2, column=1)
+entry_exit_price.grid(row=3, column=1)
+
+# Position option
+position_var = tk.StringVar(value="long")
+tk.Label(root, text="Position:").grid(row=4, column=0, sticky="e")
+tk.OptionMenu(root, position_var, "long", "short").grid(row=4, column=1)
+
+# Calculate button
+tk.Button(root, text="Calculate PnL", command=calculate_pnl).grid(row=5, column=0, columnspan=2, pady=10)
+
+# Result display
+result_label = tk.Label(root, text="", font=("Arial", 12), fg="blue")
+result_label.grid(row=6, column=0, columnspan=2)
+
+root.mainloop()
